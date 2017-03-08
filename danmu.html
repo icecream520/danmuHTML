@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title></title>
+
+    <link rel="stylesheet" href="http://cdn.bootcss.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" >
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" >
+        <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Lato:300,400,700,300italic,400italic,700italic" >
+  </head>
+  <style>
+  body,
+  html {
+      width: 100%;
+      height: 100%;
+
+  }
+
+  body,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+      font-family: "Lato","Helvetica Neue",Helvetica,Arial,sans-serif;
+      font-weight: 700;
+  }
+.d_screen .d_mask{width:100%;height:340px;background:#000;opacity:0.5;
+   filter:alpha(opacity=50) z-index:1;}
+.d_screen .d_show div{font-size:22px;line-height:36px;font-weight:500;color:#fff;position:absolute;left:0;top:0;}
+#send{margin:0 auto;border:1px solid #000;}
+  </style>
+  <body>
+
+<!-- <<nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+  <div class="container">
+  </div>
+</nav> -->
+<div id="d_screen" class="d_screen" style="border: 1px solid rgb(229, 229, 229);">
+
+  <div id="d_mask" class="d_mask" style="background:#fff;"></div>
+  <div class="d_show">
+    <!-- <div>text message</div>  -->
+  </div>
+</div>
+<div class="send" style="margin-left:32%;">
+  <div class="s_fiter">
+    <div class="s_con">
+      <p><input placeholder="说点什么?" class="s_txt" type="text" style="width:50%;
+height: 34px;
+border-radius: 3px;
+border: 1px solid rgb(204, 204, 204);
+padding-left: 10px;"/> </p><p style="padding-left:8%;">
+      <input type="button" value="发 射" class="s_sub" style="border: 1px solid rgb(230, 80, 30);color:rgb(230, 80, 30);
+border-radius: 3px;
+text-align: center;
+padding: 0;
+height: 35px;
+line-height: 35px;
+font-size: 14px;width:20%;background-color:white"/>
+      <input type="button" value="清 屏" class="s_del" style="border: 1px solid rgb(176, 168, 165);color:rgb(176, 168, 165);
+border-radius: 3px;
+text-align: center;
+padding-left: 0;
+heights: 35px;
+line-height: 35px;
+font-size: 14px;width:20%;background-color:white" /> </p>
+    </div>
+  </div>
+</div>
+    <div class="intro-header">
+      <div class="player">
+          <div id="player" class="aplayer" style="max-width:32rem;z-index:2;"></div>
+      </div>
+    </div>
+    <script src = "https://cdn.wilddog.com/sdk/js/2.0.0/wilddog-auth.js"></script>
+    <script src = "https://cdn.wilddog.com/sdk/js/2.0.0/wilddog-sync.js"></script>
+      <script src="https://cdn.wilddog.com/js/vendor/jquery-1.11.2.min.js"></script>
+      <script src="https://cdn.staticfile.org/aplayer/1.5.8/APlayer.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.2/js/bootstrap.min.js"></script>
+    <script>
+
+$(document).ready(function() {
+//  alert( $('.d_mask').height());
+  var topMin = $('.d_mask').offset().top;
+  var topMax = topMin + $('.d_mask').height();
+  var _top = topMin;
+  var less = parseInt(topMax/(topMin+50));
+var imgUrl = [];
+imgUrl[0] = "http://s13.sinaimg.cn/middle/7c3b9fa5ha8ba5aca0e9c&690";
+imgUrl[1] = "http://s3.sinaimg.cn/middle/7c3b9fa5ha8ba5d7e78c2&690";
+imgUrl[2] = "http://s4.sinaimg.cn/middle/7c3b9fa5ha8ba585f25f3&690";
+imgUrl[3] = "http://s13.sinaimg.cn/middle/7c3b9fa5h7745d5b515bc&690";
+imgUrl[4] = "http://s11.sinaimg.cn/middle/7c3b9fa5ha8ba5ee42b5a&690";
+imgUrl[6] = "http://s14.sinaimg.cn/middle/7c3b9fa5h7745d5f774dd&690";
+imgUrl[7] = "http://s15.sinaimg.cn/middle/7c3b9fa5ha8ba5c4d0abe&690";
+imgUrl[8] = "http://s15.sinaimg.cn/middle/7c3b9fa5ha8ba5c9951de&690";
+imgUrl[9] = "http://s6.sinaimg.cn/middle/7c3b9fa5ha8ba5d425f95&690";
+imgUrl[10] = "http://s5.sinaimg.cn/middle/7c3b9fa5ha8ba5dcac154&690";
+  var config = {
+    authDomain:"danmu.wilddog.com",
+    syncURL: "https://277587336-01.wilddogio.com"
+  };
+  wilddog.initializeApp(config);
+  var ref = wilddog.sync().ref();
+  var arr = [];
+  $(".s_sub").click(function() {
+    // 获取输入框的数据
+    var text = $(".s_txt").val();
+    ref.child('message').push(text);
+    // 将数据写到云端 message 节点下，child 用来定位子节点
+    $(".s_txt").val('');
+        Run();
+  });
+
+  $(".s_txt").keypress(function(event) {
+    if(event.keyCode == "13") {
+      $(".s_sub").trigger('click');
+    }
+  });
+
+  $(".s_del").click(function() {
+    ref.remove();
+    arr = [];
+    $('.d_show').empty();
+  });
+// 绑定 'child_added' 事件，当 message 节点下有子节点新增时，就会触发回调，回调的 `snapshot` 对象包含了新增的数据
+  ref.child('message').on('child_added', function(snapshot) {
+    var text = snapshot.val();
+     arr.push(text);
+    //  var textObj = $("<div class=\"dm_message\"></div>");
+    //              textObj.text(text);
+    //  $(".d_show").append(textObj);
+    // moveObj(textObj,less);
+  });
+
+  ref.on('child_removed', function() {
+    arr = [];
+    $('.d_show').empty();
+  });
+  var moveObj = function(obj,num) {
+
+    var _left = $('.d_mask').width() - obj.width();
+    var	new_top = _top + 50*num;
+    if(_top > (topMax - 50)){
+      _top = topMin;
+    }
+    obj.css({left:_left,top:new_top,color:getReandomColor()});
+    var time = 20000 + 10000 * Math.random();
+    obj.animate({left:"-"+_left+"px"}, time, function(){
+      obj.remove();
+    });
+  }
+
+  var getReandomColor = function() {
+    return '#'+(function(h){
+      return new Array(7-h.length).join("0")+h
+      })((Math.random()*0x1000000<<0).toString(16))
+  }
+
+  var Run = function() {
+    if (arr.length > 0&& less>=0) {
+      //var n = Math.floor(Math.random() * arr.length + 1) - 1;
+      var textObj = $("<div>" + arr[arr.length-1] + "</div>");
+      $(".d_show").append(textObj);
+      moveObj(textObj,less);
+    }
+
+  }
+  var getAndRun = function() {
+    if (arr.length > 0&& less>=0) {
+      //var n = Math.floor(Math.random() * arr.length + 1) - 1;
+      var textObj = $("<div>" + arr[arr.length-1] + "</div>");
+      $(".d_show").append(textObj);
+      moveObj(textObj,less);
+    }
+
+  }
+  var getAndRun1 = function() {
+    if (arr.length > 1&& less-1>=0) {
+      //var n = Math.floor(Math.random() * arr.length + 1) - 1;
+      var textObj = $("<div>" + arr[arr.length-2] + "</div>");
+      $(".d_show").append(textObj);
+      moveObj(textObj,less-1);
+    }
+    setTimeout(getAndRun1, 6000);
+  }
+  var getAndRun2 = function() {
+    if (arr.length > 2&& less-2>=0) {
+      //var n = Math.floor(Math.random() * arr.length + 1) - 1;
+      var textObj = $("<div>" + arr[arr.length-3] + "</div>");
+      $(".d_show").append(textObj);
+      moveObj(textObj,less-2);
+    }
+    setTimeout(getAndRun2, 7000);
+  }
+  var getAndRun3 = function() {
+    if (arr.length > 3&& less-3>=0) {
+      //var n = Math.floor(Math.random() * arr.length + 1) - 1;
+      var textObj = $("<div>" + arr[arr.length-4] + "</div>");
+      $(".d_show").append(textObj);
+      moveObj(textObj,less-3);
+    }
+    setTimeout(getAndRun3, 8000);
+  }
+  var getAndRun4 = function() {
+    if (arr.length > 4 && less-4>=0) {
+      //var n = Math.floor(Math.random() * arr.length + 1) - 1;
+      var textObj = $("<div>" + arr[arr.length-5] + "</div>");
+      $(".d_show").append(textObj);
+      moveObj(textObj,less-4);
+    }
+    setTimeout(getAndRun4, 9000);
+  }
+  var imgRun = function()
+  {
+    var n = Math.floor(Math.random()*imgUrl.length+1)-1;
+    var imgBack = document.getElementById("d_screen");
+    var newimg ="url("+imgUrl[n]+")no-repeat center center fixed";
+    imgBack.style.background=newimg;
+
+setTimeout(imgRun, 10000);
+  }
+  jQuery.fx.interval = 50;
+getAndRun1();
+getAndRun2();
+
+getAndRun3();
+getAndRun4();
+  imgRun();
+});
+</script>
+<script>
+var ap5 = new APlayer({
+    element: document.getElementById('player'),
+    narrow: false,
+    autoplay: true,
+    showlrc: false,
+    mutex: false,
+    theme: '#ad7a86',
+    mode: 'random',
+    listmaxheight: '80px',
+    music: [
+        {
+            title:'业火苍云歌',
+            author: '我的小白呢',
+            url: 'http://olnqabrqb.bkt.clouddn.com/%E9%9F%B3%E9%A2%91%E6%80%AA%E7%89%A9%20-%20%E4%B8%9A%E7%81%AB%E8%8B%8D%E4%BA%91%E6%AD%8C%28%E7%BA%AF%E6%AD%8C%E7%89%88%29.mp3',
+            pic: 'http://olnqabrqb.bkt.clouddn.com/QQ%E5%9B%BE%E7%89%8720170306165151.jpg',
+            lrc: ''
+        },
+        {
+            title:'一战破晓',
+            author: '我的小白呢',
+            url: 'http://olnqabrqb.bkt.clouddn.com/%E9%9F%B3%E9%A2%91%E6%80%AA%E7%89%A9,%E6%B2%B3%E5%9B%BE%20-%20%E4%B8%80%E6%88%98%E7%A0%B4%E6%99%93.mp3',
+            pic: 'http://olnqabrqb.bkt.clouddn.com/QQ%E5%9B%BE%E7%89%8720170306165151.jpg',
+            lrc: ''
+        },
+        {
+            title: '锦鲤抄',
+            author: '我的小白呢',
+            url: 'http://olnqabrqb.bkt.clouddn.com/%E9%93%B6%E4%B8%B4%20-%20%E9%94%A6%E9%B2%A4%E6%8A%84.mp3',
+            pic: 'http://olnqabrqb.bkt.clouddn.com/QQ%E5%9B%BE%E7%89%8720170306165151.jpg',
+            lrc: ''
+        }
+    ]
+});
+</script>
+  </body>
+</html>
